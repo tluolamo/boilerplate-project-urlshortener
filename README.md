@@ -1,4 +1,6 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=tluolamo_boilerplate-project-urlshortener&metric=alert_status)](https://sonarcloud.io/dashboard?id=tluolamo_boilerplate-project-urlshortener)
+![CircleCI](https://img.shields.io/circleci/build/github/tluolamo/boilerplate-project-urlshortener)
+[![codecov](https://codecov.io/gh/tluolamo/boilerplate-project-urlshortener/branch/gomix/graph/badge.svg)](https://codecov.io/gh/tluolamo/boilerplate-project-urlshortener)
 
 # API Project: URL Shortener Microservice for freeCodeCamp
 
