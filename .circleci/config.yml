@@ -10,8 +10,8 @@ jobs:
       - checkout
       - node/with-cache:
           steps:
-            - run: npm install
-            - run: npm test
+            - run: yarn install
+            - run: yarn test:coverage
       - store_artifacts:
           path: coverage
       - codecov/upload:
