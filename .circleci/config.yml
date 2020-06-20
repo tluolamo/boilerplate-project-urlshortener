@@ -11,6 +11,7 @@ jobs:
       - node/with-cache:
           steps:
             - run: yarn install
+            - run: yarn test
             - run: yarn test:coverage
       - store_artifacts:
           path: coverage
