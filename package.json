@@ -5,7 +5,9 @@
 	"main": "server.js",
 	"scripts": {
     "start": "PORT=3000 nodemon server.js",
-    "test": "standard --fix; jest --coverage"
+    "test": "standard --fix; jest",
+		"test:coverage": "yarn run test -o --coverage",
+    "test:watch": "yarn run test -o --watch"
   },
 	"dependencies": {
 		"body-parser": "^1.19.0",
