@@ -2,7 +2,10 @@
 const request = require('supertest')
 const MongoMemoryServer = require('mongodb-memory-server').MongoMemoryServer
 const mongoose = require('mongoose')
-const app = require('../app')
+const App = require('../app')
+const app = App.app
+const ShortURL = App.ShortURL
+// const Counters = App.ShortURL
 
 // jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000
 
@@ -52,7 +55,7 @@ describe('Test /api/shorturl/new', () => {
     done()
   })
 
-  test('It should return error for invalid urls', async done => {
+  test('It should return Invalid URL error for invalid urls', async done => {
     const badUrls = [
       'https://www.googledasfdfasfasdfdfdafdafddf.com',
       'htts://www.google.com/',
@@ -66,11 +69,29 @@ describe('Test /api/shorturl/new', () => {
     done()
   })
 
-  /* test('It should throw DB error in rare cases', async done => {
-    const response = await request(app).post('/api/shorturl/new', 'http://www.google.com')
+  test('It should return DB error in rare cases', async done => {
+    // test findOne handling
+    let orig = ShortURL.findOne
+    ShortURL.findOne = jest.fn()
+    ShortURL.findOne.mockImplementation(() => {
+      throw new Error()
+    })
+    let response = await request(app).post('/api/shorturl/new').send('url=https://www.google.com/')
     await expect(response.body.error).toBe('DB error')
+    ShortURL.findOne = orig
+
+    // test findOneAndUpdate handling
+    orig = ShortURL.findOneAndUpdate
+    ShortURL.findOneAndUpdate = jest.fn()
+    ShortURL.findOneAndUpdate.mockImplementation(() => {
+      throw new Error()
+    })
+    response = await request(app).post('/api/shorturl/new').send('url=https://www.google.com/somethingnew')
+    await expect(response.body.error).toBe('DB error')
+    ShortURL.findOneAndUpdate = orig
+
     done()
-  }) */
+  })
 })
 
 describe('Test /api/shorturl/::number::', () => {

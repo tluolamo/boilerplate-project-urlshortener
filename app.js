@@ -45,7 +45,7 @@ app.post('/api/shorturl/new', async (req, res) => {
       // first check if the record exists in the db, this is to prevent creating new sequence number every time we run this code.
       shortURLRec = await ShortURL.findOne(query)
     } catch (err) {
-      console.log(err)
+      // console.log(err)
       data = dbErr
     }
     // entry doesn't exist in the db
@@ -66,7 +66,7 @@ app.post('/api/shorturl/new', async (req, res) => {
           }
         )
       } catch (err) {
-        console.log(err)
+        // console.log(err)
         data = dbErr
       }
     }
@@ -100,4 +100,8 @@ const getNextSequenceValue = async (sequenceName) => {
   return sequenceDocument.seq_value
 }
 
-module.exports = app
+module.exports = {
+  app,
+  ShortURL,
+  Counters
+}
