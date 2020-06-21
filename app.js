@@ -25,6 +25,7 @@ app.use(cors())
 // you should mount the body-parser here
 app.use(bodyParser.urlencoded({ extended: false }))
 
+// routes
 app.use('/public', express.static(process.cwd() + '/public'))
 
 app.get('/', async (req, res) => {
@@ -84,7 +85,19 @@ app.post('/api/shorturl/new', async (req, res) => {
     data = { original_url: myURL.host, short_url: shortURLRec.seq }
   }
 
-  res.json(data)
+  await res.json(data)
+})
+
+app.get('/api/shorturl/:id', async (req, res) => {
+  // console.log(req.params)
+  try {
+    // check if the record exists
+    const shortURLRec = await ShortURL.findOne({ seq: req.params.id })
+    res.redirect(301, shortURLRec.url)
+  } catch (err) {
+    // console.log(err)
+    res.json({ error: 'No such record' })
+  }
 })
 
 // this is to keep track of auto incrment field

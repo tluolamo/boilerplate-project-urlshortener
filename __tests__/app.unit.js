@@ -1,14 +1,14 @@
 /* eslint-env jest */
 const request = require('supertest')
 const MongoMemoryServer = require('mongodb-memory-server').MongoMemoryServer
-const mongoose = require('mongoose')
+// const mongoose = require('mongoose')
 
 // jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000
 
 let mongoServer
 
 beforeAll(async () => {
-  jest.resetModules()
+  // jest.resetModules()
   mongoServer = new MongoMemoryServer({
     binary: {
       version: 'latest' // or you use process.env.MONGOMS_VERSION = '4.0.0'
@@ -16,21 +16,22 @@ beforeAll(async () => {
   })
   const mongoUri = await mongoServer.getUri()
   process.env.MONGO_URI = mongoUri
-  await mongoose.connect(mongoUri, {}, (err) => {
-    if (err) console.error(err)
-  })
+  // await mongoose.connect(mongoUri, {}, (err) => {
+  //  if (err) console.error(err)
+  // })
 })
 
 afterAll(async () => {
-  await mongoose.disconnect()
+  // await mongoose.disconnect()
   await mongoServer.stop()
 })
 
 describe('Test Homepage', () => {
-  test('It should respond to the GET method', async () => {
+  test('It should respond to the GET method', async done => {
     const app = require('../app')
     const response = await request(app).get('/')
     expect(response.statusCode).toBe(200)
+    done()
   })
 })
 
@@ -49,11 +50,11 @@ describe('Test /api/shorturl/new', () => {
       expect(response.statusCode).toBe(200)
       expect(response.body.original_url).toBe('www.google.com')
       expect(typeof response.body.short_url).toBe('number')
-      done()
     }
+    done()
   })
 
-  test('It should return error for invalid urls', async () => {
+  test('It should return error for invalid urls', async done => {
     const app = require('../app')
 
     const badUrls = [
@@ -64,15 +65,24 @@ describe('Test /api/shorturl/new', () => {
 
     for (const url of badUrls) {
       const response = await request(app).post('/api/shorturl/new', url)
-      expect(response.body.error).toBe('invalid URL')
+      await expect(response.body.error).toBe('invalid URL')
     }
+    done()
   })
 })
 
 describe('Test /api/shorturl/::number::', () => {
-  test('It should respond to the GET method and return 301 redirect', async () => {
+  test('It should respond to the GET method and return 301 redirect', async done => {
     const app = require('../app')
-    const response = await request(app).get('/')
+    const response = await request(app).get('/api/shorturl/1')
     expect(response.statusCode).toBe(301)
+    done()
+  })
+
+  test('It should return error if no record exists for the id', async done => {
+    const app = require('../app')
+    const response = await request(app).get('/api/shorturl/9999')
+    expect(response.body.error).toBe('No such record')
+    done()
   })
 })
