@@ -5,7 +5,7 @@ const mongoose = require('mongoose')
 const App = require('../app')
 const app = App.app
 const ShortURL = App.ShortURL
-// const Counters = App.ShortURL
+const Counters = App.Counters
 
 // jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000
 
@@ -70,7 +70,7 @@ describe('Test /api/shorturl/new', () => {
   })
 
   test('It should return DB error in rare cases', async done => {
-    // test findOne handling
+    // test ShortURL findOne handling
     let orig = ShortURL.findOne
     ShortURL.findOne = jest.fn()
     ShortURL.findOne.mockImplementation(() => {
@@ -80,7 +80,7 @@ describe('Test /api/shorturl/new', () => {
     await expect(response.body.error).toBe('DB error')
     ShortURL.findOne = orig
 
-    // test findOneAndUpdate handling
+    // test ShortURL findOneAndUpdate handling
     orig = ShortURL.findOneAndUpdate
     ShortURL.findOneAndUpdate = jest.fn()
     ShortURL.findOneAndUpdate.mockImplementation(() => {
@@ -89,6 +89,17 @@ describe('Test /api/shorturl/new', () => {
     response = await request(app).post('/api/shorturl/new').send('url=https://www.google.com/somethingnew')
     await expect(response.body.error).toBe('DB error')
     ShortURL.findOneAndUpdate = orig
+
+    // finally test Counters findByIdAndUpdate
+    orig = Counters.findByIdAndUpdate
+    Counters.findByIdAndUpdate = jest.fn()
+    Counters.findByIdAndUpdate.mockImplementation(() => {
+      throw new Error()
+    })
+    response = await request(app).post('/api/shorturl/new').send('url=https://www.google.com/somethingnew')
+    // console.log(response.body)
+    await expect(response.body.error).toBe('DB error')
+    Counters.findByIdAndUpdate = orig
 
     done()
   })

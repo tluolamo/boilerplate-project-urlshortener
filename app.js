@@ -52,11 +52,12 @@ app.post('/api/shorturl/new', async (req, res) => {
     if (!shortURLRec) {
       // try find it once more incase race condition and if it doesn't exists insert it with new sequence number instead
       try {
+        const seq = await getNextSequenceValue('shortURL')
         shortURLRec = await ShortURL.findOneAndUpdate(
           query,
           {
             $setOnInsert: {
-              seq: await getNextSequenceValue('shortURL'),
+              seq: seq,
               url: urlStr
             }
           },
@@ -93,11 +94,15 @@ app.get('/api/shorturl/:id', async (req, res) => {
 
 // this is to keep track of auto incrment field
 const getNextSequenceValue = async (sequenceName) => {
-  const sequenceDocument = await Counters.findByIdAndUpdate(
-    sequenceName,
-    { $inc: { seq_value: 1 } },
-    { new: true, upsert: true })
-  return sequenceDocument.seq_value
+  try {
+    const sequenceDocument = await Counters.findByIdAndUpdate(
+      sequenceName,
+      { $inc: { seq_value: 1 } },
+      { new: true, upsert: true })
+    return sequenceDocument.seq_value
+  } catch (err) {
+    throw new Error(err)
+  }
 }
 
 module.exports = {
