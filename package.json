@@ -6,7 +6,7 @@
 	"scripts": {
 		"start": "nodemon server.js",
 		"test": "standard --fix; jest --runInBand",
-		"test:coverage": "yarn run test -o --coverage",
+		"test:coverage": "yarn run test --all --coverage",
 		"test:watch": "yarn run test -o --watch"
 	},
 	"dependencies": {
