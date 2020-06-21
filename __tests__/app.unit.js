@@ -1,23 +1,49 @@
 /* eslint-env jest */
 const request = require('supertest')
-const app = require('../app')
+const MongoMemoryServer = require('mongodb-memory-server').MongoMemoryServer
+const mongoose = require('mongoose')
 
-/* describe('Test Homepage', () => {
+// jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000
+
+let mongoServer
+
+beforeAll(async () => {
+  jest.resetModules()
+  mongoServer = new MongoMemoryServer({
+    binary: {
+      version: 'latest' // or you use process.env.MONGOMS_VERSION = '4.0.0'
+    }
+  })
+  const mongoUri = await mongoServer.getUri()
+  process.env.MONGO_URI = mongoUri
+  await mongoose.connect(mongoUri, {}, (err) => {
+    if (err) console.error(err)
+  })
+})
+
+afterAll(async () => {
+  await mongoose.disconnect()
+  await mongoServer.stop()
+})
+
+describe('Test Homepage', () => {
   test('It should respond to the GET method', async () => {
+    const app = require('../app')
     const response = await request(app).get('/')
     expect(response.statusCode).toBe(200)
   })
-}) */
+})
 
 describe('Test /api/shorturl/new', () => {
   test('It should return shortened URL for good URLs', async done => {
+    const app = require('../app')
     const goodUrls = [
       'https://www.google.com/'
     ]
 
     for (const url of goodUrls) {
       // console.log({ url })
-      const response = await request(app).post('/api/shorturl/new').send({ url })
+      const response = await request(app).post('/api/shorturl/new').send(`url=${url}`)
       // const response = await request(app).post('/api/shorturl/new').send({ something: 'hello' })
 
       expect(response.statusCode).toBe(200)
@@ -27,7 +53,9 @@ describe('Test /api/shorturl/new', () => {
     }
   })
 
-  /* test('It should return error for invalid urls', async () => {
+  test('It should return error for invalid urls', async () => {
+    const app = require('../app')
+
     const badUrls = [
       'https://www.googledasfdfasfasdfdfdafdafddf.com',
       'htts://www.google.com/',
@@ -36,22 +64,15 @@ describe('Test /api/shorturl/new', () => {
 
     for (const url of badUrls) {
       const response = await request(app).post('/api/shorturl/new', url)
-      expect(response.body).toBe('{"error":"invalid URL"}')
+      expect(response.body.error).toBe('invalid URL')
     }
-  }) */
+  })
 })
 
-/* describe('Test /api/shorturl/::number::', () => {
+describe('Test /api/shorturl/::number::', () => {
   test('It should respond to the GET method and return 301 redirect', async () => {
+    const app = require('../app')
     const response = await request(app).get('/')
     expect(response.statusCode).toBe(301)
   })
-}) */
-
-// /api/shorturl/3
-
-/*
-1. I can POST a URL to `[project_url]/api/shorturl/new` and I will receive a shortened URL in the JSON response. Example : `{"original_url":"www.google.com","short_url":1}`
-2. If I pass an invalid URL that doesn't follow the valid `http(s)://www.example.com(/more/routes)` format, the JSON response will contain an error like `{"error":"invalid URL"}`. *HINT*: to be sure that the submitted url points to a valid site you can use the function `dns.lookup(host, cb)` from the `dns` core module.
-3. When I visit the shortened URL, it will redirect me to my original link.
-*/
+})

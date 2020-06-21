@@ -16,6 +16,7 @@ const app = express()
 
 /** this project needs a db !! **/
 // mongoose.set('debug', true)
+// console.log(process.env.MONGO_URI)
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 
 app.use(cors())
@@ -34,19 +35,18 @@ app.get('/', async (req, res) => {
 app.post('/api/shorturl/new', async (req, res) => {
   // console.log(req.body)
   const urlStr = req.body.url
+  const dbErr = { error: 'DB error' }
   const query = { url: urlStr }
 
   let myURL, shortURLRec, data
-
   try {
     // parse the url, this should throw type error for invalid url
     myURL = new url.URL(urlStr)
     // console.log(myURL)
   } catch (err) {
-    console.log(err)
+    // console.log(err)
     data = { error: 'invalid URL' }
   }
-
   if (myURL) {
     // we have valid url
     try {
@@ -54,9 +54,8 @@ app.post('/api/shorturl/new', async (req, res) => {
       shortURLRec = await ShortURL.findOne(query)
     } catch (err) {
       console.log(err)
-      data.error = 'DB error'
+      data = dbErr
     }
-
     // entry doesn't exist in the db
     if (!shortURLRec) {
       // try find it once more incase race condition and if it doesn't exists insert it with new sequence number instead
@@ -76,11 +75,10 @@ app.post('/api/shorturl/new', async (req, res) => {
         )
       } catch (err) {
         console.log(err)
-        data.error = 'DB error'
+        data = dbErr
       }
     }
   }
-
   // set the return data correctly if there were no errors
   if (!data) {
     data = { original_url: myURL.host, short_url: shortURLRec.seq }
