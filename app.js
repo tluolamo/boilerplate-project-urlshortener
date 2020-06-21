@@ -3,22 +3,12 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const url = require('url')
-const mongoose = require('mongoose')
 const cors = require('cors')
 
 const Counters = require('./counters')
 const ShortURL = require('./shortURL')
 
 const app = express()
-
-/** this project needs a db !! **/
-// mongoose.set('debug', true)
-// console.log(process.env.MONGO_URI)
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-
-const disconnect = () => {
-  mongoose.disconnect()
-}
 
 app.use(cors())
 
@@ -110,7 +100,4 @@ const getNextSequenceValue = async (sequenceName) => {
   return sequenceDocument.seq_value
 }
 
-module.exports = {
-  app,
-  disconnect
-}
+module.exports = app

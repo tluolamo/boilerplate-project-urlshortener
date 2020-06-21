@@ -1,8 +1,8 @@
 /* eslint-env jest */
 const request = require('supertest')
 const MongoMemoryServer = require('mongodb-memory-server').MongoMemoryServer
-// const mongoose = require('mongoose')
-let app, disconnect
+const mongoose = require('mongoose')
+const app = require('../app')
 
 // jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000
 
@@ -16,17 +16,13 @@ beforeAll(async () => {
     }
   })
   const mongoUri = await mongoServer.getUri()
-  process.env.MONGO_URI = mongoUri
-  // await mongoose.connect(mongoUri, {}, (err) => {
-  //  if (err) console.error(err)
-  // })
-  const App = require('../app')
-  app = App.app
-  disconnect = App.disconnect
+  await mongoose.connect(mongoUri, {}, (err) => {
+    if (err) console.error(err)
+  })
 })
 
 afterAll(async () => {
-  await disconnect()
+  await mongoose.disconnect()
   await mongoServer.stop()
 })
 
@@ -69,6 +65,12 @@ describe('Test /api/shorturl/new', () => {
     }
     done()
   })
+
+  /* test('It should throw DB error in rare cases', async done => {
+    const response = await request(app).post('/api/shorturl/new', 'http://www.google.com')
+    await expect(response.body.error).toBe('DB error')
+    done()
+  }) */
 })
 
 describe('Test /api/shorturl/::number::', () => {
