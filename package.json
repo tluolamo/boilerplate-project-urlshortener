@@ -4,7 +4,7 @@
 	"description": "API project for freeCodeCamp",
 	"main": "server.js",
 	"scripts": {
-		"start": "PORT=3000 nodemon server.js",
+		"start": "nodemon server.js",
 		"test": "standard --fix; jest --runInBand",
 		"test:coverage": "yarn run test -o --coverage",
 		"test:watch": "yarn run test -o --watch"

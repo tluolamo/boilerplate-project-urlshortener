@@ -3,10 +3,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const url = require('url')
-// const validator = require('validator')
-// var mongo = require('mongodb')
 const mongoose = require('mongoose')
-
 const cors = require('cors')
 
 const Counters = require('./counters')
