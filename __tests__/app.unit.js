@@ -2,6 +2,7 @@
 const request = require('supertest')
 const MongoMemoryServer = require('mongodb-memory-server').MongoMemoryServer
 // const mongoose = require('mongoose')
+let app, disconnect
 
 // jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000
 
@@ -19,16 +20,18 @@ beforeAll(async () => {
   // await mongoose.connect(mongoUri, {}, (err) => {
   //  if (err) console.error(err)
   // })
+  const App = require('../app')
+  app = App.app
+  disconnect = App.disconnect
 })
 
 afterAll(async () => {
-  // await mongoose.disconnect()
+  await disconnect()
   await mongoServer.stop()
 })
 
 describe('Test Homepage', () => {
   test('It should respond to the GET method', async done => {
-    const app = require('../app')
     const response = await request(app).get('/')
     expect(response.statusCode).toBe(200)
     done()
@@ -37,7 +40,6 @@ describe('Test Homepage', () => {
 
 describe('Test /api/shorturl/new', () => {
   test('It should return shortened URL for good URLs', async done => {
-    const app = require('../app')
     const goodUrls = [
       'https://www.google.com/'
     ]
@@ -55,8 +57,6 @@ describe('Test /api/shorturl/new', () => {
   })
 
   test('It should return error for invalid urls', async done => {
-    const app = require('../app')
-
     const badUrls = [
       'https://www.googledasfdfasfasdfdfdafdafddf.com',
       'htts://www.google.com/',
@@ -73,14 +73,12 @@ describe('Test /api/shorturl/new', () => {
 
 describe('Test /api/shorturl/::number::', () => {
   test('It should respond to the GET method and return 301 redirect', async done => {
-    const app = require('../app')
     const response = await request(app).get('/api/shorturl/1')
     expect(response.statusCode).toBe(301)
     done()
   })
 
   test('It should return error if no record exists for the id', async done => {
-    const app = require('../app')
     const response = await request(app).get('/api/shorturl/9999')
     expect(response.body.error).toBe('No such record')
     done()
